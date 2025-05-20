@@ -6,5 +6,6 @@ namespace Prueba_SCISA_Pokemon.Services
     {
         Task<ListPokemonsModel> GetPokemons();
         Task<ListPokemonsModel> UpdateViewPokemons(string url);
+        Task<List<Pokemon>> GetPokemonTypes();
     }
 }

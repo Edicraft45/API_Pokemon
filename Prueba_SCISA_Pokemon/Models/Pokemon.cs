@@ -1,9 +1,12 @@
-﻿namespace Prueba_SCISA_Pokemon.Models
+﻿using Prueba_SCISA_Pokemon.Helpers;
+
+namespace Prueba_SCISA_Pokemon.Models
 {
     public class Pokemon
     {
         public string Name { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
+        public List<PokemonType> Types { get; set; }
 
         public int Id
         {

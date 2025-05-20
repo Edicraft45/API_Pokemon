@@ -52,7 +52,7 @@ namespace Prueba_SCISA_Pokemon.Services
 
             var client = new HttpClient();
             client.BaseAddress = new Uri(_baseURL);
-            var response = await client.GetAsync("pokemon?limit=50");
+            var response = await client.GetAsync("type?limit=21");
 
             if (response.IsSuccessStatusCode)
             {
@@ -61,6 +61,28 @@ namespace Prueba_SCISA_Pokemon.Services
             }
 
             return listPokemonsModel;
+        }
+
+        public async Task<List<Pokemon>> GetPokemonTypes()
+        {
+            var result = new List<Pokemon>();
+
+            var client = new HttpClient();
+            client.BaseAddress = new Uri(_baseURL);
+            var response = await client.GetAsync("type?limit=21");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var listPokemonsModel = JsonConvert.DeserializeObject<ListPokemonsModel>(json);
+
+                if (listPokemonsModel.Results != null)
+                {
+                    result = listPokemonsModel.Results;
+                }
+            }
+
+            return result;
         }
     }
 }

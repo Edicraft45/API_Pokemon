@@ -10,7 +10,7 @@ namespace Prueba_SCISA_Pokemon.Controllers
     public class HomeController : Controller
     {
         private static IPokemonService _pokemonService;
-
+        private static PokemonVM PokemonVM;
         public HomeController(IPokemonService pokemonService)
         {
             _pokemonService = pokemonService;
@@ -19,14 +19,22 @@ namespace Prueba_SCISA_Pokemon.Controllers
         public async Task<IActionResult> Index()
         {
             var pokemonList = await _pokemonService.GetPokemons();
-            return View(pokemonList);
+
+            var pokemonTypes = await _pokemonService.GetPokemonTypes();
+
+            PokemonVM = new PokemonVM()
+            {
+                listPokemonsModel = pokemonList,
+                pokemonsType = pokemonTypes
+            };
+            return View(PokemonVM);
         }
         public async Task<IActionResult> PaginatedPokemons(string url) 
         {
             if (string.IsNullOrWhiteSpace(url)) return RedirectToAction("Index");
             var newPokemons = await _pokemonService.UpdateViewPokemons(url);
-
-            return View("Index", newPokemons);
+            PokemonVM.listPokemonsModel = newPokemons;
+            return View("Index", PokemonVM);
         }
 
         [HttpPost]
