@@ -1,11 +1,14 @@
 # Ignore build outputs
-Prueba_SCISA_Pokemon/bin/
-Prueba_SCISA_Pokemon/obj/
-*.user
 *.suo
+*.user
+_ReSharper.*
+bin
+obj
+packages
 
 # VS-related
 .vs/
 
 # ASP.NET temp
 wwwroot/lib/
+
