@@ -1,6 +1,6 @@
 # Ignore build outputs
-bin/
-obj/
+Prueba_SCISA_Pokemon/bin/
+Prueba_SCISA_Pokemon/obj/
 *.user
 *.suo
 

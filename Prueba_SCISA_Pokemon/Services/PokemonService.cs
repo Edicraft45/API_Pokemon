@@ -19,7 +19,7 @@ namespace Prueba_SCISA_Pokemon.Services
 
             var client = new HttpClient();
             client.BaseAddress = new Uri(_baseURL);
-            var response = await client.GetAsync("pokemon?limit=50");
+            var response = await client.GetAsync("pokemon?limit=100");
 
             if (response.IsSuccessStatusCode)
             {

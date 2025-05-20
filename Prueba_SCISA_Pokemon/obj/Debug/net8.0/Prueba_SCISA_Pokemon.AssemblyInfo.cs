@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Prueba_SCISA_Pokemon")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9de8c789873241ef76924d6b1b146a15a503197c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3422e355e74f6eeaf1f99aab18f6886dc5f62bda")]
 [assembly: System.Reflection.AssemblyProductAttribute("Prueba_SCISA_Pokemon")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Prueba_SCISA_Pokemon")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
