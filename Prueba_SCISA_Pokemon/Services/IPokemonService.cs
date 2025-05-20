@@ -1,4 +1,5 @@
-﻿using Prueba_SCISA_Pokemon.Models;
+﻿using Prueba_SCISA_Pokemon.Helpers;
+using Prueba_SCISA_Pokemon.Models;
 
 namespace Prueba_SCISA_Pokemon.Services
 {
@@ -6,6 +7,6 @@ namespace Prueba_SCISA_Pokemon.Services
     {
         Task<ListPokemonsModel> GetPokemons();
         Task<ListPokemonsModel> UpdateViewPokemons(string url);
-        Task<List<Pokemon>> GetPokemonTypes();
+        Task<List<PokemonType>> GetPokemonTypes();
     }
 }

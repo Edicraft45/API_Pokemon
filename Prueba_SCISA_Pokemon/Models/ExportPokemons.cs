@@ -2,6 +2,6 @@
 {
     public class ExportPokemons
     {
-        public List<Pokemon> Pokemons { get; set; } = new List<Pokemon>();
+        public List<ExportPokemon> Pokemons { get; set; } = new List<ExportPokemon>();
     }
 }

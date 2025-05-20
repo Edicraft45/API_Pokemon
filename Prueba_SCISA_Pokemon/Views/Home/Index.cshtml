@@ -10,23 +10,26 @@
     <div class="row g-2 align-items-center">
         <!-- Formulario de búsqueda por nombre -->
         <div class="col-md-5">
-            <form asp-action="Index" asp-controller="Home" method="get" class="d-flex">
-                <input type="text" name="nameFilter" class="form-control me-2" placeholder="Nombre del Pokémon..." />
-                <button type="submit" class="btn btn-primary">Buscar</button>
+            <form asp-action="Index" method="get" class="mb-3">
+                <div class="input-group">
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Buscar Pokémon por nombre" />
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
             </form>
         </div>
 
         <!-- Formulario de filtrado por tipo (envía automáticamente al cambiar) -->
         <div class="col-md-4">
-            <form asp-action="Index" asp-controller="Home" method="get">
-                <select id="typeFilter" name="selectedType" class="form-select" onchange="this.form.submit()">
-                    <option value="">Todos los tipos</option>
-                    @foreach (var type in Model.pokemonsType)
-                    {
-                        <option value="@type.Id">@type.Name</option>
-                    }
-                </select>
-            </form>
+@* <form asp-action="Index" asp-controller="Home" method="get">
+    <select id="typeFilter" name="selectedType" class="form-select" onchange="this.form.submit()">
+        <option value="">Todos los tipos</option>
+        @foreach (var type in Model.pokemonsType.Distinct())
+        {
+            <option value="@type" @(type.ToString() == Model.SearchType ? "selected" : "")>@type</option>
+        }
+    </select>
+</form> *@
+
         </div>
     </div>
 </div>
@@ -35,17 +38,39 @@
 <!-- Botones: Paginación + Exportar -->
 <div class="container d-flex justify-content-between align-items-center">
     <!-- Paginación -->
-    <div>
-        <a asp-action="PaginatedPokemons" asp-controller="Home" asp-route-url="@Model.listPokemonsModel.Previous" class="btn btn-outline-primary btn-sm">← Anterior</a>
-        <a asp-action="PaginatedPokemons" asp-controller="Home" asp-route-url="@Model.listPokemonsModel.Next" class="btn btn-outline-primary btn-sm">Siguiente →</a>
+    <div class="d-flex justify-content-center my-3">
+        <nav>
+            <ul class="pagination">
+
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)">← Anterior</a>
+                </li>
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)">Siguiente →</a>
+                </li>
+
+            </ul>
+        </nav>
     </div>
+
 
     <!-- Exportar a Excel -->
     <form asp-action="ExportToExcel" asp-controller="Home" method="post" class="d-inline">
         @for (int i = 0; i < Model.listPokemonsModel.Results.Count; i++)
         {
+            <input type="hidden" name="Pokemons[@i].Id" value="@Model.listPokemonsModel.Results[i].Id" />
             <input type="hidden" name="Pokemons[@i].Name" value="@Model.listPokemonsModel.Results[i].Name" />
             <input type="hidden" name="Pokemons[@i].Url" value="@Model.listPokemonsModel.Results[i].Url" />
+            <input type="hidden" name="Pokemons[@i].ImageUrl" value="@Model.listPokemonsModel.Results[i].ImageUrl" />
+            <input type="hidden" name="Pokemons[@i].TypesString" value="@string.Join(",", Model.listPokemonsModel.Results[i].Types)" />
         }
         <button type="submit" class="btn btn-success btn-sm">Exportar a Excel</button>
     </form>

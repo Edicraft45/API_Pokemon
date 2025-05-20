@@ -26,4 +26,21 @@ namespace Prueba_SCISA_Pokemon.Models
         public string Url { get; set; }
     }
 
+
+
+
+
+
+    public class TypeListResponse
+    {
+        public List<TypeResult> Results { get; set; }
+    }
+
+    public class TypeResult
+    {
+        public string Name { get; set; }
+        public string Url { get; set; }
+    }
+
+
 }

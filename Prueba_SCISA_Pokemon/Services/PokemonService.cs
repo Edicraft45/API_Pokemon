@@ -44,9 +44,9 @@ namespace Prueba_SCISA_Pokemon.Services
             return listPokemonsModel;
         }
 
-        public async Task<List<Pokemon>> GetPokemonTypes()
+        public async Task<List<PokemonType>> GetPokemonTypes()
         {
-            var result = new List<Pokemon>();
+            var types = new List<PokemonType>();
 
             var client = new HttpClient();
             client.BaseAddress = new Uri(_baseURL);
@@ -55,16 +55,23 @@ namespace Prueba_SCISA_Pokemon.Services
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var listPokemonsModel = JsonConvert.DeserializeObject<ListPokemonsModel>(json);
+                var typeResponse = JsonConvert.DeserializeObject<TypeListResponse>(json);
 
-                if (listPokemonsModel.Results != null)
+                if (typeResponse?.Results != null)
                 {
-                    result = listPokemonsModel.Results;
+                    foreach (var item in typeResponse.Results)
+                    {
+                        if (Enum.TryParse<PokemonType>(Capitalize.Capitalizes(item.Name), true, out var result))
+                        {
+                            types.Add(result);
+                        }
+                    }
                 }
             }
 
-            return result;
+            return types;
         }
+
 
         public async Task<ListPokemonsModel> UpdateViewPokemons(string url)
         {
