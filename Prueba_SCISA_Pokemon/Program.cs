@@ -1,7 +1,11 @@
+using Prueba_SCISA_Pokemon.Models;
+using Prueba_SCISA_Pokemon.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IPokemonService, PokemonService>();
 
 var app = builder.Build();
 
