@@ -1,0 +1,29 @@
+﻿using Newtonsoft.Json;
+
+namespace Prueba_SCISA_Pokemon.Models
+{
+    public class PokemonDetailsResponse
+    {
+        [JsonProperty("types")]
+        public List<TypeSlot> Types { get; set; }
+    }
+
+    public class TypeSlot
+    {
+        [JsonProperty("slot")]
+        public int Slot { get; set; }
+
+        [JsonProperty("type")]
+        public NamedApiResource Type { get; set; }
+    }
+
+    public class NamedApiResource
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("url")]
+        public string Url { get; set; }
+    }
+
+}

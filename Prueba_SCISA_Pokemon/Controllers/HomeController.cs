@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
+using Prueba_SCISA_Pokemon.Helpers;
 using Prueba_SCISA_Pokemon.Models;
 using Prueba_SCISA_Pokemon.Services;
 
@@ -35,6 +36,10 @@ namespace Prueba_SCISA_Pokemon.Controllers
             var newPokemons = await _pokemonService.UpdateViewPokemons(url);
             PokemonVM.listPokemonsModel = newPokemons;
             return View("Index", PokemonVM);
+        }
+        public IActionResult FilterByType(PokemonType type)
+        {
+            return View(type);
         }
 
         [HttpPost]
