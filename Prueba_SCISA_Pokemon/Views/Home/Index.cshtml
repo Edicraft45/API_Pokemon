@@ -5,8 +5,31 @@
 
 <h2>Listado de Pokémon</h2>
 
-<a asp-action="PaginatedPokemons" asp-controller="Home" asp-route-url="@Model.Previous" class="btn btn-primary btn-sm">Anterior</a>
-<a asp-action="PaginatedPokemons" asp-controller="Home" asp-route-url="@Model.Next" class="btn btn-primary btn-sm">Siguiente</a>
+<div class="d-flex justify-content-between mb-3">
+    <div>
+        <form asp-action="Index" asp-controller="Home" method="get" class="form-inline mb-3">
+            <div class="input-group">
+                <input type="text" name="nameFilter" class="form-control" placeholder="Nombre del Pokémon..." />
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </div>
+        </form>
+    </div>
+    <div>
+        <a asp-action="PaginatedPokemons" asp-controller="Home" asp-route-url="@Model.Previous" class="btn btn-primary btn-sm">Anterior</a>
+        <a asp-action="PaginatedPokemons" asp-controller="Home" asp-route-url="@Model.Next" class="btn btn-primary btn-sm">Siguiente</a>
+    </div>
+    <div>
+        <form asp-action="ExportToExcel" asp-controller="Home" method="post" class="ms-auto">
+            @foreach (var p in Model.Results)
+            {
+                <input type="hidden" name="Pokemons[@Model.Results.IndexOf(p)].Name" value="@p.Name" />
+                <input type="hidden" name="Pokemons[@Model.Results.IndexOf(p)].Url" value="@p.Url" />
+            }
+            <button type="submit" class="btn btn-success btn-sm">Exportar a Excel</button>
+        </form>
+    </div>
+</div>
+
 
 @if (Model.Results.Any())
 {
@@ -16,7 +39,7 @@
             <div class="pokemon-card">
                 <img src="@p.ImageUrl" alt="@p.Name" />
                 <div class="pokemon-name">@p.Name</div>
-                <a asp-action="GetPokemon" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Exportar Excel</a>
+                <a asp-action="GetPokemon" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Detalles</a>
                 <a asp-action="GetPokemon" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Envio Correo</a>
             </div>
         }

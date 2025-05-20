@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Prueba_SCISA_Pokemon.Models;
 using Prueba_SCISA_Pokemon.Services;
@@ -27,6 +28,35 @@ namespace Prueba_SCISA_Pokemon.Controllers
 
             return View("Index", newPokemons);
         }
+
+        [HttpPost]
+        public IActionResult ExportToExcel(ExportPokemons request)
+        {
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Pokemons");
+
+            worksheet.Cell(1, 1).Value = "ID";
+            worksheet.Cell(1, 2).Value = "Nombre";
+            worksheet.Cell(1, 3).Value = "URL detalles";
+            worksheet.Cell(1, 4).Value = "Imagen URL";
+
+            for (int i = 0; i < request.Pokemons.Count; i++)
+            {
+                worksheet.Cell(i + 2, 1).Value = request.Pokemons[i].Id;
+                worksheet.Cell(i + 2, 2).Value = request.Pokemons[i].Name;
+                worksheet.Cell(i + 2, 3).Value = request.Pokemons[i].Url;
+                worksheet.Cell(i + 2, 4).Value = request.Pokemons[i].ImageUrl;
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Position = 0;
+
+            return File(stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "pokemons.xlsx");
+        }
+
 
         public IActionResult Privacy()
         {

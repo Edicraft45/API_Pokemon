@@ -45,5 +45,22 @@ namespace Prueba_SCISA_Pokemon.Services
 
             return listPokemonsModel;
         }
+
+        public async Task<ListPokemonsModel> GetPokemonsByName(string name)
+        {
+            var listPokemonsModel = new ListPokemonsModel();
+
+            var client = new HttpClient();
+            client.BaseAddress = new Uri(_baseURL);
+            var response = await client.GetAsync("pokemon?limit=50");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                listPokemonsModel = JsonConvert.DeserializeObject<ListPokemonsModel>(json);
+            }
+
+            return listPokemonsModel;
+        }
     }
 }
