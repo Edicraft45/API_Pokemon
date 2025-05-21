@@ -218,7 +218,8 @@ namespace Prueba_SCISA_Pokemon.Controllers
             }
             catch (SmtpException smtpEx)
             {
-                TempData["ErrorMessage"] = $"Error SMTP al enviar el correo: {smtpEx.Message}";
+                TempData["ErrorMessage"] = $"Error SMTP al enviar el correo: {smtpEx.Message}." +
+                    $"\n Favor de revisar las credenciales";
             }
             catch (FormatException formatEx)
             {
