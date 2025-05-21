@@ -114,9 +114,10 @@
 </div>
 
 
-
+<!-- Verifica si hay pokemons a mostrar -->
 @if (Model.listPokemonsModel.Results.Any())
 {
+    <!-- Carga los pokemons en el GRID -->
     <div class="pokemon-grid">
         @foreach (var p in Model.listPokemonsModel.Results)
         {
@@ -124,7 +125,7 @@
                 <img src="@p.ImageUrl" alt="@p.Name" />
                 <div class="pokemon-name">@p.Name</div>
                 <a asp-action="GetPokemon" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Detalles</a>
-                <a asp-action="SendPokemonEmail" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Envio Correo</a>
+                <a asp-action="SendPokemonEmail" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Enviar al Correo</a>
             </div>
         }
     </div>

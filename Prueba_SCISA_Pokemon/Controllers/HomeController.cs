@@ -23,114 +23,159 @@ namespace Prueba_SCISA_Pokemon.Controllers
         }
 
 
+        /// <summary>
+        /// Acción principal que muestra la lista de Pokémon con filtros por nombre, tipo y paginación.
+        /// Los datos se recuperan desde la sesión o desde el servicio si no están en caché.
+        /// </summary>
+        /// <param name="searchTerm">Nombre del Pokémon para buscar.</param>
+        /// <param name="pokemonType">Tipo de Pokémon a filtrar (en texto).</param>
+        /// <param name="page">Número de página para la paginación. Por defecto es 1.</param>
+        /// <returns>Vista con el ViewModel de los Pokémon filtrados y paginados.</returns>
         public async Task<IActionResult> Index(string searchTerm, string pokemonType, int page = 1)
         {
-            var session = HttpContext.Session;
-
-            var pokemonList = session.GetObject<ListPokemonsModel>("PokemonList");
-            var pokemonTypes = session.GetObject<List<PokemonType>>("PokemonTypes");
-            var vm = session.GetObject<PokemonVM>("PokemonVM") ?? new PokemonVM();
-
-            if (pokemonList == null)
+            try
             {
-                pokemonList = await _pokemonService.GetPokemons();
-                session.SetObject("PokemonList", pokemonList);
+                var session = HttpContext.Session;
+
+                var pokemonList = session.GetObject<ListPokemonsModel>("PokemonList");
+                var pokemonTypes = session.GetObject<List<PokemonType>>("PokemonTypes");
+                var vm = session.GetObject<PokemonVM>("PokemonVM") ?? new PokemonVM();
+
+                // Si no hay pokemones en sesión, se consultan desde el servicio
+                if (pokemonList == null)
+                {
+                    pokemonList = await _pokemonService.GetPokemons();
+                    session.SetObject("PokemonList", pokemonList);
+                }
+
+                // Si no hay tipos de Pokémon en sesión, se consultan desde el servicio
+                if (pokemonTypes == null)
+                {
+                    pokemonTypes = await _pokemonService.GetPokemonTypes();
+                    session.SetObject("PokemonTypes", pokemonTypes);
+                }
+
+                // Se comienza con toda la lista y se aplica filtrado progresivo
+                var filteredResults = pokemonList.Results.AsQueryable();
+
+                // Convertir el texto del tipo a enum (si es válido)
+                PokemonType? filterType = null;
+                if (!string.IsNullOrEmpty(pokemonType) &&
+                    Enum.TryParse<PokemonType>(pokemonType, true, out var parsedType))
+                {
+                    filterType = parsedType;
+                }
+
+                // Filtro por nombre
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    filteredResults = filteredResults
+                        .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                }
+
+                // Filtro por tipo
+                if (filterType.HasValue)
+                {
+                    filteredResults = filteredResults
+                        .Where(p => p.Types != null && p.Types.Contains(filterType.Value));
+                }
+
+                // Paginación
+                int pageSize = 10;
+                int totalPage = (int)Math.Ceiling((double)filteredResults.Count() / pageSize);
+
+                var paginated = filteredResults
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                // Preparar ViewModel
+                vm.listPokemonsModel = new ListPokemonsModel
+                {
+                    Count = filteredResults.Count(),
+                    Results = paginated
+                };
+                vm.pokemonsType = pokemonTypes;
+                vm.TotalPages = totalPage;
+                vm.CurrentPage = page;
+                vm.SearchTerm = searchTerm;
+                vm.SearchType = pokemonType;
+
+                return View(vm);
             }
-
-            if (pokemonTypes == null)
+            catch (Exception ex)
             {
-                pokemonTypes = await _pokemonService.GetPokemonTypes();
-                session.SetObject("PokemonTypes", pokemonTypes);
+                Console.WriteLine($"Error en Index: {ex.Message}");
+                return StatusCode(500, "Ocurrió un error al cargar los datos.");
             }
-
-            var filteredResults = pokemonList.Results.AsQueryable();
-
-            // Convertir tipo string a enum (si aplica)
-            PokemonType? filterType = null;
-            if (!string.IsNullOrEmpty(pokemonType) &&
-                Enum.TryParse<PokemonType>(pokemonType, true, out var parsedType))
-            {
-                filterType = parsedType;
-            }
-
-            // Filtro por nombre
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                filteredResults = filteredResults
-                    .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-            }
-
-            // Filtro por tipo
-            if (filterType.HasValue)
-            {
-                filteredResults = filteredResults
-                    .Where(p => p.Types != null && p.Types.Contains(filterType.Value));
-            }
-
-            // Paginación
-            int pageSize = 10;
-            int totalPage = (int)Math.Ceiling((double)filteredResults.Count() / pageSize);
-
-            var paginated = filteredResults
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            // Asignar valores al ViewModel
-            vm.listPokemonsModel = new ListPokemonsModel
-            {
-                Count = filteredResults.Count(),
-                Results = paginated
-            };
-            vm.pokemonsType = pokemonTypes;
-            vm.TotalPages = totalPage;
-            vm.CurrentPage = page;
-            vm.SearchTerm = searchTerm;
-            vm.SearchType = pokemonType;
-
-            return View(vm);
         }
 
+        /// <summary>
+        /// Exporta una lista de Pokémon a un archivo Excel y lo devuelve como descarga al usuario.
+        /// </summary>
+        /// <param name="request">Objeto que contiene la lista de Pokémon a exportar.</param>
+        /// <returns>Archivo Excel con la información de los Pokémon.</returns>
         [HttpPost]
         public IActionResult ExportToExcel(ExportPokemons request)
         {
-            using var workbook = new XLWorkbook();
-            var worksheet = workbook.Worksheets.Add("Pokemons");
-
-            worksheet.Cell(1, 1).Value = "ID";
-            worksheet.Cell(1, 2).Value = "Nombre";
-            worksheet.Cell(1, 3).Value = "URL detalles";
-            worksheet.Cell(1, 4).Value = "Imagen URL";
-            worksheet.Cell(1, 5).Value = "Tipo";
-
-            for (int i = 0; i < request.Pokemons.Count; i++)
+            try
             {
-                worksheet.Cell(i + 2, 1).Value = request.Pokemons[i].Id;
-                worksheet.Cell(i + 2, 2).Value = request.Pokemons[i].Name;
-                worksheet.Cell(i + 2, 3).Value = request.Pokemons[i].Url;
-                worksheet.Cell(i + 2, 4).Value = request.Pokemons[i].ImageUrl;
-                worksheet.Cell(i + 2, 5).Value = request.Pokemons[i].TypesString;
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Pokemons");
+
+                // Cabeceras
+                worksheet.Cell(1, 1).Value = "ID";
+                worksheet.Cell(1, 2).Value = "Nombre";
+                worksheet.Cell(1, 3).Value = "URL detalles";
+                worksheet.Cell(1, 4).Value = "Imagen URL";
+                worksheet.Cell(1, 5).Value = "Tipo";
+
+                // Carga de datos fila por fila
+                for (int i = 0; i < request.Pokemons.Count; i++)
+                {
+                    worksheet.Cell(i + 2, 1).Value = request.Pokemons[i].Id;
+                    worksheet.Cell(i + 2, 2).Value = request.Pokemons[i].Name;
+                    worksheet.Cell(i + 2, 3).Value = request.Pokemons[i].Url;
+                    worksheet.Cell(i + 2, 4).Value = request.Pokemons[i].ImageUrl;
+                    worksheet.Cell(i + 2, 5).Value = request.Pokemons[i].TypesString;
+                }
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                stream.Position = 0;
+
+                return File(stream.ToArray(),
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "pokemons.xlsx");
             }
-
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            stream.Position = 0;
-
-            return File(stream.ToArray(),
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "pokemons.xlsx");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al exportar a Excel: {ex.Message}");
+                return StatusCode(500, "Ocurrió un error al generar el archivo Excel.");
+            }
         }
 
+        /// <summary>
+        /// Envía un correo electrónico con la información detallada de un Pokémon especificado por su ID.
+        /// </summary>
+        /// <param name="n">ID del Pokémon a enviar por correo.</param>
+        /// <returns>Redirecciona a la vista Index, mostrando un mensaje de éxito o error.</returns>
         public async Task<IActionResult> SendPokemonEmail(int n)
         {
             try
             {
                 var session = HttpContext.Session;
-                var pokemons = (session.GetObject<ListPokemonsModel>("PokemonList")?.Results) ?? throw new Exception("La lista de Pokémon no está disponible en la sesión.");
+
+                // Obtiene la lista de Pokémon desde la sesión
+                var pokemons = (session.GetObject<ListPokemonsModel>("PokemonList")?.Results)
+                    ?? throw new Exception("La lista de Pokémon no está disponible en la sesión.");
+
+                // Busca el Pokémon por su ID
                 var pokemon = pokemons.FirstOrDefault(p => p.Id == n);
                 if (pokemon == null)
                     return NotFound("Pokémon no encontrado.");
 
+                // Obtiene credenciales y configuración del correo desde _emailSettings
                 var fromEmail = _emailSettings.FromEmail;
                 var toEmail = _emailSettings.ToEmail;
                 var appPassword = _emailSettings.AppPassword;
@@ -138,14 +183,16 @@ namespace Prueba_SCISA_Pokemon.Controllers
                 if (string.IsNullOrEmpty(fromEmail) || string.IsNullOrEmpty(toEmail) || string.IsNullOrEmpty(appPassword))
                     throw new Exception("Faltan credenciales de correo electrónico.");
 
+                // Construcción del cuerpo HTML del correo
                 var body = $@"
-                                <h2>Datos del Pokémon</h2>
-                                <p><strong>Nombre:</strong> {pokemon.Name}</p>
-                                <p><strong>ID:</strong> {pokemon.Id}</p>
-                                <p><strong>Tipo:</strong> {string.Join(", ", pokemon.Types ?? [])}</p>
-                                <img src='{pokemon.ImageUrl}' alt='{pokemon.Name}' width='150'/>
-                            ";
+                            <h2>Datos del Pokémon</h2>
+                            <p><strong>Nombre:</strong> {pokemon.Name}</p>
+                            <p><strong>ID:</strong> {pokemon.Id}</p>
+                            <p><strong>Tipo:</strong> {string.Join(", ", pokemon.Types ?? [])}</p>
+                            <img src='{pokemon.ImageUrl}' alt='{pokemon.Name}' width='150'/>
+                        ";
 
+                // Configura el cliente SMTP
                 using var smtp = new SmtpClient(_emailSettings.SmtpHost)
                 {
                     Port = _emailSettings.SmtpPort,
@@ -153,6 +200,7 @@ namespace Prueba_SCISA_Pokemon.Controllers
                     EnableSsl = true
                 };
 
+                // Crea el mensaje a enviar
                 var message = new MailMessage
                 {
                     From = new MailAddress(fromEmail),
@@ -162,8 +210,10 @@ namespace Prueba_SCISA_Pokemon.Controllers
                 };
                 message.To.Add(toEmail);
 
+                // Envío del correo
                 await smtp.SendMailAsync(message);
 
+                // Mensaje temporal de éxito para mostrar en la vista
                 TempData["SuccessMessage"] = $"Correo enviado correctamente con la información de {pokemon.Name}.";
             }
             catch (SmtpException smtpEx)
@@ -181,9 +231,6 @@ namespace Prueba_SCISA_Pokemon.Controllers
 
             return RedirectToAction("Index");
         }
-
-
-
 
         public IActionResult Privacy()
         {
