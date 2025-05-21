@@ -1,5 +1,8 @@
 ﻿namespace Prueba_SCISA_Pokemon.Helpers
 {
+    /// <summary>
+    /// Representa los diferentes tipos de Pokémon según la PokéAPI.
+    /// </summary>
     public enum PokemonType
     {
         Normal,
