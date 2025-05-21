@@ -18,6 +18,14 @@ namespace Prueba_SCISA_Pokemon.Services
         /// <returns>Una lista de <see cref="PokemonType"/> con los tipos disponibles.</returns>
         Task<List<PokemonType>> GetPokemonTypes();
 
+        /// <summary>
+        /// Obtiene los detalles adicionales de un Pokémon desde la PokéAPI
+        /// </summary>
+        /// <param name="id">El ID del Pokémon a consultar.</param>
+        /// <returns>
+        /// Un objeto <see cref="PokemonDetails"/> que contiene información como felicidad base,
+        /// tasa de captura, si es legendario o mítico, etc.
+        /// </returns>
         Task<PokemonDetails> GetPokemonDetails(int id);
     }
 }

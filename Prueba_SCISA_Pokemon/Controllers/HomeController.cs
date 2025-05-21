@@ -232,35 +232,48 @@ namespace Prueba_SCISA_Pokemon.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Retorna los detalles de un Pokémon específico, combinando información de la PokéAPI
+        /// con los tipos almacenados previamente en sesión.
+        /// </summary>
+        /// <param name="n">El ID del Pokémon.</param>
+        /// <returns>
+        /// Un objeto JSON que contiene la información básica del Pokémon junto con sus tipos.
+        /// </returns>
         [HttpGet]
         public async Task<IActionResult> GetPokemon(int n)
         {
-            // Obtener detalles desde la API
-            var details = await _pokemonService.GetPokemonDetails(n);
-            if (details == null)
-                return NotFound();
-
-            // Obtener tipos desde la sesión
-            var pokemons = HttpContext.Session.GetObject<ListPokemonsModel>("PokemonList")?.Results;
-            var pokemon = pokemons?.FirstOrDefault(p => p.Id == n);
-            var types = pokemon?.Types?.Select(t => t.ToString()) ?? [];
-
-            // Devolver JSON con detalles + tipos
-
-            var json = Json(new
+            try
             {
-                details.Id,
-                details.Name,
-                details.Base_happiness,
-                details.Capture_rate,
-                details.Is_legendary,
-                details.Is_mythical,
-                details.ImageUrl,
-                Types = types
-            });
-            return json;
-        }
+                // Obtener detalles desde la API
+                var details = await _pokemonService.GetPokemonDetails(n);
+                if (details == null)
+                    return NotFound("No se encontraron detalles del Pokémon.");
 
+                // Obtener tipos desde la sesión
+                var pokemons = HttpContext.Session.GetObject<ListPokemonsModel>("PokemonList")?.Results;
+                var pokemon = pokemons?.FirstOrDefault(p => p.Id == n);
+                var types = pokemon?.Types?.Select(t => t.ToString()) ?? new List<string>();
+
+                // Devolver JSON con detalles + tipos
+                return Json(new
+                {
+                    details.Id,
+                    details.Name,
+                    details.Base_happiness,
+                    details.Capture_rate,
+                    details.Is_legendary,
+                    details.Is_mythical,
+                    details.ImageUrl,
+                    Types = types
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener detalles del Pokémon: {ex.Message}");
+                return StatusCode(500, "Ocurrió un error al obtener los detalles del Pokémon.");
+            }
+        }
 
         public IActionResult Privacy()
         {

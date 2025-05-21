@@ -139,20 +139,35 @@ namespace Prueba_SCISA_Pokemon.Services
             return types;
         }
 
-        public async Task<PokemonDetails> GetPokemonDetails(int id) 
+        /// <summary>
+        /// Obtiene los detalles adicionales de un Pokémon desde la PokéAPI
+        /// </summary>
+        /// <param name="id">El ID del Pokémon a consultar.</param>
+        /// <returns>
+        /// Un objeto <see cref="PokemonDetails"/> que contiene información como felicidad base,
+        /// tasa de captura, si es legendario o mítico, etc.
+        /// </returns>
+        public async Task<PokemonDetails> GetPokemonDetails(int id)
         {
-            var types = new PokemonDetails();
+            var details = new PokemonDetails();
+
             try
             {
-                using var client = new HttpClient();
-                client.BaseAddress = new Uri(_baseURL);
+                using var client = new HttpClient
+                {
+                    BaseAddress = new Uri(_baseURL)
+                };
 
                 var response = await client.GetAsync($"pokemon-species/{id}");
 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    types = JsonConvert.DeserializeObject<PokemonDetails>(json);
+                    details = JsonConvert.DeserializeObject<PokemonDetails>(json);
+                }
+                else
+                {
+                    Console.WriteLine($"La respuesta de la API no fue exitosa. Código: {response.StatusCode}");
                 }
             }
             catch (HttpRequestException ex)
@@ -167,8 +182,10 @@ namespace Prueba_SCISA_Pokemon.Services
             {
                 Console.WriteLine($"Error inesperado: {ex.Message}");
             }
-            return types;
+
+            return details;
         }
+
 
     }
 }
