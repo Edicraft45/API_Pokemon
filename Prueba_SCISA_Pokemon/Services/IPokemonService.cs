@@ -6,7 +6,6 @@ namespace Prueba_SCISA_Pokemon.Services
     public interface IPokemonService
     {
         Task<ListPokemonsModel> GetPokemons();
-        Task<ListPokemonsModel> UpdateViewPokemons(string url);
         Task<List<PokemonType>> GetPokemonTypes();
     }
 }

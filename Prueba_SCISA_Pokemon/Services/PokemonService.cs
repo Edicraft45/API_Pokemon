@@ -71,41 +71,5 @@ namespace Prueba_SCISA_Pokemon.Services
 
             return types;
         }
-
-
-        public async Task<ListPokemonsModel> UpdateViewPokemons(string url)
-        {
-            var listPokemonsModel = new ListPokemonsModel();
-
-            var client = new HttpClient();
-            var response = await client.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-                listPokemonsModel = JsonConvert.DeserializeObject<ListPokemonsModel>(json);
-            }
-
-            return listPokemonsModel;
-        }
-
-        public async Task<ListPokemonsModel> GetPokemonsByName(string name)
-        {
-            var listPokemonsModel = new ListPokemonsModel();
-
-            var client = new HttpClient();
-            client.BaseAddress = new Uri(_baseURL);
-            var response = await client.GetAsync("type?limit=21");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-                listPokemonsModel = JsonConvert.DeserializeObject<ListPokemonsModel>(json);
-            }
-
-            return listPokemonsModel;
-        }
-
-
     }
 }

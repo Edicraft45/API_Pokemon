@@ -4,12 +4,13 @@ namespace Prueba_SCISA_Pokemon.Models
 {
     public class PokemonVM
     {
-        public ListPokemonsModel listPokemonsModel { get; set; }
-        public List<PokemonType> pokemonsType { get; set; }
+        public ListPokemonsModel listPokemonsModel { get; set; } = new ListPokemonsModel();
+        public List<PokemonType> pokemonsType { get; set; } = new List<PokemonType>();
 
         public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public string SearchTerm { get; set; } = string.Empty;
+        public string SearchType { get; set; } = string.Empty;
 
         public int TotalPages { get; set; }
 
