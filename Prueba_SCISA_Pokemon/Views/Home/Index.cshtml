@@ -124,10 +124,40 @@
             <div class="pokemon-card">
                 <img src="@p.ImageUrl" alt="@p.Name" />
                 <div class="pokemon-name">@p.Name</div>
-                <a asp-action="GetPokemon" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Detalles</a>
+                <button type="button" class="btn btn-outline-primary btn-sm"
+                        onclick="showPokemonDetails(@p.Id)">
+                    Detalles
+                </button>
                 <a asp-action="SendPokemonEmail" asp-controller="Home" asp-route-n="@p.Id" class="btn btn-outline-primary btn-sm">Enviar al Correo</a>
             </div>
         }
+        <!-- Modal de Detalles del Pokémon -->
+        <div class="modal fade" id="pokemonModal" tabindex="-1" aria-labelledby="pokemonModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content text-center">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="pokemonModalLabel">Detalles del Pokémon</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img id="modalPokemonImage" class="img-fluid mb-3" alt="Imagen del Pokémon">
+                        <p><strong>Nombre:</strong> <span id="modalPokemonName"></span></p>
+                        <p><strong>ID:</strong> <span id="modalPokemonId"></span></p>
+                        <p><strong>Tipos:</strong> <span id="modalPokemonTypes"></span></p>
+                        <p><strong>Felicidad base:</strong> <span id="modalPokemonHappiness"></span></p>
+                        <p><strong>Tasa de captura:</strong> <span id="modalPokemonCaptureRate"></span></p>
+                        <p><strong>Legendario:</strong> <span id="modalPokemonLegendary"></span></p>
+                        <p><strong>Mítico:</strong> <span id="modalPokemonMythical"></span></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
     </div>
 }
 else
@@ -162,3 +192,37 @@ else
         text-transform: capitalize;
     }
 </style>
+
+<script>
+    function showPokemonDetails(id) {
+        fetch(`/Home/GetPokemon?n=${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Error al obtener el Pokémon");
+                return response.json();
+            })
+            .then(data => {
+                // Verifica qué está llegando
+                console.log(data);
+
+                document.getElementById("modalPokemonName").textContent = data.name;
+                document.getElementById("modalPokemonId").textContent = data.id;
+                document.getElementById("modalPokemonImage").src = data.imageUrl;
+                document.getElementById("modalPokemonImage").alt = data.name;
+                document.getElementById("modalPokemonTypes").textContent = (data.types || []).join(", ");
+                document.getElementById("modalPokemonHappiness").textContent = data.base_happiness;
+                document.getElementById("modalPokemonCaptureRate").textContent = data.capture_rate;
+                document.getElementById("modalPokemonLegendary").textContent = data.is_legendary ? "Sí" : "No";
+                document.getElementById("modalPokemonMythical").textContent = data.is_mythical == 1 ? "Sí" : "No";
+
+                const modal = new bootstrap.Modal(document.getElementById('pokemonModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error("Error en fetch:", error);
+                alert("No se pudo obtener la información del Pokémon.");
+            });
+    }
+</script>
+
+
+

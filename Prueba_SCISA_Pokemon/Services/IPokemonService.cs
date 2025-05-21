@@ -17,5 +17,7 @@ namespace Prueba_SCISA_Pokemon.Services
         /// </summary>
         /// <returns>Una lista de <see cref="PokemonType"/> con los tipos disponibles.</returns>
         Task<List<PokemonType>> GetPokemonTypes();
+
+        Task<PokemonDetails> GetPokemonDetails(int id);
     }
 }

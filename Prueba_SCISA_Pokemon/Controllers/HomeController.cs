@@ -232,6 +232,36 @@ namespace Prueba_SCISA_Pokemon.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetPokemon(int n)
+        {
+            // Obtener detalles desde la API
+            var details = await _pokemonService.GetPokemonDetails(n);
+            if (details == null)
+                return NotFound();
+
+            // Obtener tipos desde la sesión
+            var pokemons = HttpContext.Session.GetObject<ListPokemonsModel>("PokemonList")?.Results;
+            var pokemon = pokemons?.FirstOrDefault(p => p.Id == n);
+            var types = pokemon?.Types?.Select(t => t.ToString()) ?? [];
+
+            // Devolver JSON con detalles + tipos
+
+            var json = Json(new
+            {
+                details.Id,
+                details.Name,
+                details.Base_happiness,
+                details.Capture_rate,
+                details.Is_legendary,
+                details.Is_mythical,
+                details.ImageUrl,
+                Types = types
+            });
+            return json;
+        }
+
+
         public IActionResult Privacy()
         {
             return View();

@@ -10,8 +10,6 @@ namespace Prueba_SCISA_Pokemon.Models
 
     public class TypeSlot
     {
-        [JsonProperty("slot")]
-        public int Slot { get; set; }
 
         [JsonProperty("type")]
         public NamedApiResource Type { get; set; }
@@ -21,15 +19,7 @@ namespace Prueba_SCISA_Pokemon.Models
     {
         [JsonProperty("name")]
         public string Name { get; set; }
-
-        [JsonProperty("url")]
-        public string Url { get; set; }
     }
-
-
-
-
-
 
     public class TypeListResponse
     {
@@ -39,7 +29,6 @@ namespace Prueba_SCISA_Pokemon.Models
     public class TypeResult
     {
         public string Name { get; set; }
-        public string Url { get; set; }
     }
 
 

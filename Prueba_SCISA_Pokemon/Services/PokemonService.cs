@@ -139,5 +139,36 @@ namespace Prueba_SCISA_Pokemon.Services
             return types;
         }
 
+        public async Task<PokemonDetails> GetPokemonDetails(int id) 
+        {
+            var types = new PokemonDetails();
+            try
+            {
+                using var client = new HttpClient();
+                client.BaseAddress = new Uri(_baseURL);
+
+                var response = await client.GetAsync($"pokemon-species/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    types = JsonConvert.DeserializeObject<PokemonDetails>(json);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error en la solicitud HTTP: {ex.Message}");
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Error al deserializar JSON: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error inesperado: {ex.Message}");
+            }
+            return types;
+        }
+
     }
 }
